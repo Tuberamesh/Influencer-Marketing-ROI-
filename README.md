@@ -16,12 +16,6 @@ Interactive analytics dashboard designed to analyze influencer campaign performa
 
 ---
 
-## Dashboard Preview
-
-![Dashboard Preview](https://github.com/Tuberamesh/Influencer-Marketing-ROI-/blob/main/Previews/Overview.png)
-
----
-
 ## Dashboard Overview
 
 The dashboard analyzes 1,826 influencer marketing campaigns across major social media platforms between 2022 and 2026.
@@ -33,6 +27,11 @@ It was designed to simulate a real-world marketing intelligence system used for:
 - Audience engagement analysis
 - Platform benchmarking
 - Marketing decision support
+
+---
+## Dashboard Preview
+
+![Dashboard Preview](https://github.com/Tuberamesh/Influencer-Marketing-ROI-/blob/main/Previews/Overview.png)
 
 ---
 
