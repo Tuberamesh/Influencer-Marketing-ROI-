@@ -1,4 +1,4 @@
-## Influencer Marketing ROI Dashboard
+# Influencer Marketing ROI Dashboard
 
 A data analytics dashboard designed to analyze influencer marketing performance across platforms, campaign types, and audience segments.
 This project focuses on business intelligence, KPI tracking, and data storytelling using interactive visualizations.
