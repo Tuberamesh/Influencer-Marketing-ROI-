@@ -122,10 +122,12 @@ I build analytics projects focused on business insights, dashboard storytelling,
 
 ## Connect With Me
 
-* LinkedIn: linkedin.com/in/ramesha-g
-* YouTube: youtube.com/@The_Decoder_yt
-* Instagram: instagram.com/decoder_space
-* Portfolio: main-portfolio-tuberameshs-projects.vercel.app
+* [LinkedIn](https://www.linkedin.com/in/ramesha-g/)
+* [YouTube](https://www.youtube.com/@The_Decoder_yt/)
+* [Instagram](https://www.instagram.com/decoder_space/)
+* [Portfolio](https://main-portfolio-tuberameshs-projects.vercel.app)
+
+📧 Email: [r69046183@gmail.com](mailto:r69046183@gmail.com)
 
 ---
 
