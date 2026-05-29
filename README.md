@@ -97,17 +97,7 @@ This dashboard helps marketing teams:
 
 ## Preview
 
-![Dashboard Preview](./assets/dashboard-preview.png)
-
----
-
-## Deployment
-
-Available deployment options:
-
-* GitHub Pages
-* Netlify
-* Vercel
+![Dashboard Preview](.Overview.png)
 
 ---
 
