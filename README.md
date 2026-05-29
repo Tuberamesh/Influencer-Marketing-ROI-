@@ -105,7 +105,13 @@ Ramesh G
 Data Science Student | Analytics Enthusiast | Dashboard Developer
 
 ---
-
+📲 Connect With Me:
+📸 Instagram: https://www.instagram.com/decoder_space/
+❤️ YouTube: https://www.youtube.com/@The_Decoder_yt/
+🎓 LinkedIn: https://www.linkedin.com/in/ramesha-g/
+💼 Portfolio: https://main-portfolio-tuberameshs-projects.vercel.app
+📧 Business & Collaborations: r69046183@gmail.com
+---
 ## Final Note
 
 This project demonstrates practical skills in data analytics, KPI design, and interactive dashboard development. It reflects real-world marketing intelligence workflows used in performance tracking and decision-making.
