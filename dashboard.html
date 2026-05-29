@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Influencer Marketing ROI Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #07070E;
+  --surface:  #0F0F1A;
+  --card:     #141422;
+  --border:   #1E1E32;
+  --border2:  #282840;
+  --p1:       #6C63FF;
+  --p2:       #9D7FEA;
+  --cyan:     #22D3EE;
+  --amber:    #FBBF24;
+  --green:    #34D399;
+  --red:      #F87171;
+  --pink:     #F472B6;
+  --text:     #EEF0FF;
+  --muted:    #6B7280;
+  --sub:      #9CA3AF;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── Noise texture overlay ─────────────────────────────── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.5;
+}
+
+/* ── Header ───────────────────────────────────────────── */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(7,7,14,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:64px;
+}
+.logo{
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:1.1rem;
+  background:linear-gradient(135deg,var(--p1),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:-.02em;
+}
+.badge{
+  font-size:.72rem;font-weight:500;
+  padding:4px 12px;border-radius:20px;
+  background:rgba(108,99,255,.15);
+  border:1px solid rgba(108,99,255,.3);
+  color:var(--p2);letter-spacing:.05em;text-transform:uppercase;
+}
+nav{display:flex;gap:4px;}
+nav a{
+  font-size:.82rem;font-weight:500;color:var(--muted);
+  padding:6px 14px;border-radius:8px;text-decoration:none;
+  transition:all .2s;cursor:pointer;
+}
+nav a:hover,nav a.active{color:var(--text);background:var(--border);}
+
+/* ── Layout ───────────────────────────────────────────── */
+main{max-width:1400px;margin:0 auto;padding:36px 40px 80px;}
+
+/* ── Hero stats ───────────────────────────────────────── */
+.hero{
+  display:grid;grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:16px;margin-bottom:32px;
+}
+.kpi{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;padding:24px;
+  position:relative;overflow:hidden;
+  transition:transform .25s,border-color .25s;
+  cursor:default;
+}
+.kpi:hover{transform:translateY(-3px);border-color:var(--border2);}
+.kpi::after{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:2px;border-radius:18px 18px 0 0;
+}
+.kpi.purple::after{background:linear-gradient(90deg,var(--p1),var(--p2));}
+.kpi.cyan::after{background:linear-gradient(90deg,var(--cyan),#67E8F9);}
+.kpi.amber::after{background:linear-gradient(90deg,var(--amber),#FCD34D);}
+.kpi.green::after{background:linear-gradient(90deg,var(--green),#6EE7B7);}
+.kpi.red::after{background:linear-gradient(90deg,var(--red),var(--pink));}
+
+.kpi-icon{font-size:1.5rem;margin-bottom:12px;}
+.kpi-label{font-size:.68rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+.kpi-val{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:700;line-height:1;color:var(--text);}
+.kpi-sub{font-size:.75rem;color:var(--sub);margin-top:7px;}
+.kpi-tag{
+  display:inline-block;margin-top:8px;
+  font-size:.7rem;font-weight:500;
+  padding:2px 8px;border-radius:10px;
+}
+.kpi-tag.up{background:rgba(52,211,153,.15);color:var(--green);}
+.kpi-tag.neutral{background:rgba(108,99,255,.15);color:var(--p2);}
+
+/* ── Section ──────────────────────────────────────────── */
+.section{margin-bottom:40px;}
+.section-head{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:20px;padding-bottom:14px;
+  border-bottom:1px solid var(--border);
+}
+.section-head .dot{
+  width:10px;height:10px;border-radius:3px;flex-shrink:0;
+}
+.section-head h2{
+  font-family:'Syne',sans-serif;
+  font-size:1rem;font-weight:700;
+  color:var(--text);letter-spacing:-.01em;
+}
+.section-head span{font-size:.78rem;color:var(--muted);margin-left:auto;}
+
+/* ── Grid layouts ─────────────────────────────────────── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
+.grid-1-2{display:grid;grid-template-columns:1fr 2fr;gap:20px;}
+.grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:20px;}
+.grid-3-2{display:grid;grid-template-columns:3fr 2fr;gap:20px;}
+
+/* ── Chart card ───────────────────────────────────────── */
+.chart-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;padding:24px;
+  position:relative;
+}
+.chart-card h3{
+  font-family:'Syne',sans-serif;
+  font-size:.88rem;font-weight:600;
+  color:var(--sub);letter-spacing:.02em;
+  text-transform:uppercase;margin-bottom:18px;
+}
+.chart-wrap{position:relative;width:100%;}
+
+/* ── Insights strip ───────────────────────────────────── */
+.insights{
+  display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;
+}
+.pill{
+  font-size:.75rem;font-weight:500;
+  padding:5px 13px;border-radius:20px;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.pill.purple{background:rgba(108,99,255,.18);color:#A78BFA;border:1px solid rgba(108,99,255,.25);}
+.pill.cyan{background:rgba(34,211,238,.14);color:var(--cyan);border:1px solid rgba(34,211,238,.22);}
+.pill.green{background:rgba(52,211,153,.14);color:var(--green);border:1px solid rgba(52,211,153,.22);}
+.pill.amber{background:rgba(251,191,36,.14);color:var(--amber);border:1px solid rgba(251,191,36,.22);}
+.pill.red{background:rgba(248,113,113,.14);color:var(--red);border:1px solid rgba(248,113,113,.22);}
+
+/* ── Table ────────────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:.83rem;}
+thead tr{background:rgba(108,99,255,.08);}
+th{
+  font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;
+  color:var(--muted);padding:13px 18px;text-align:left;
+  border-bottom:1px solid var(--border);
+}
+td{padding:11px 18px;border-bottom:1px solid var(--border);color:var(--sub);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.025);color:var(--text);}
+.rank{
+  display:inline-block;width:22px;height:22px;border-radius:6px;
+  background:rgba(108,99,255,.2);color:var(--p2);
+  text-align:center;line-height:22px;font-size:.72rem;font-weight:700;
+}
+.bar-cell{position:relative;}
+.bar-bg{
+  position:absolute;left:18px;top:50%;transform:translateY(-50%);
+  height:4px;border-radius:4px;background:var(--border);
+}
+.bar-fg{height:100%;border-radius:4px;}
+
+/* ── Donut legend ─────────────────────────────────────── */
+.legend{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
+.legend-item{display:flex;align-items:center;gap:10px;font-size:.82rem;}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+.legend-label{color:var(--sub);flex:1;}
+.legend-val{color:var(--text);font-weight:500;}
+
+/* ── Platform cards ───────────────────────────────────── */
+.platform-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+.platform-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:18px;
+  transition:transform .2s,border-color .2s;
+}
+.platform-card:hover{transform:translateY(-2px);border-color:var(--border2);}
+.platform-name{
+  font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;
+  margin-bottom:4px;
+}
+.platform-rev{font-size:1.3rem;font-weight:700;font-family:'Syne',sans-serif;}
+.platform-meta{font-size:.73rem;color:var(--muted);margin-top:4px;}
+
+/* ── Footer ───────────────────────────────────────────── */
+footer{
+  border-top:1px solid var(--border);
+  padding:24px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:.78rem;color:var(--muted);
+}
+footer a{color:var(--p2);text-decoration:none;}
+footer a:hover{color:var(--text);}
+
+/* ── Scrollbar ────────────────────────────────────────── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--p1)}
+
+/* ── Tabs ─────────────────────────────────────────────── */
+.tab-bar{
+  display:flex;gap:4px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:5px;margin-bottom:28px;width:fit-content;
+}
+.tab-btn{
+  font-size:.82rem;font-weight:500;
+  padding:8px 18px;border-radius:10px;
+  border:none;background:none;
+  color:var(--muted);cursor:pointer;transition:all .2s;
+  font-family:'DM Sans',sans-serif;
+}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{background:var(--p1);color:#fff;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ── Animations ───────────────────────────────────────── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(22px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.kpi{animation:fadeUp .5s ease both;}
+.kpi:nth-child(1){animation-delay:.05s}
+.kpi:nth-child(2){animation-delay:.1s}
+.kpi:nth-child(3){animation-delay:.15s}
+.kpi:nth-child(4){animation-delay:.2s}
+.chart-card{animation:fadeUp .5s ease .2s both;}
+
+/* Glow accents */
+.glow-purple{box-shadow:0 0 40px rgba(108,99,255,.08);}
+.glow-cyan{box-shadow:0 0 40px rgba(34,211,238,.07);}
+
+@media(max-width:900px){
+  header{padding:0 20px;}
+  main{padding:24px 20px 60px;}
+  .hero{grid-template-columns:1fr 1fr;}
+  .grid-2,.grid-3,.grid-1-2,.grid-2-1,.grid-3-2{grid-template-columns:1fr;}
+  .platform-grid{grid-template-columns:1fr 1fr;}
+  nav{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════ -->
+<header>
+  <div class="logo">📡 Influencer ROI</div>
+  <nav>
+    <a class="active" onclick="showTab('overview')">Overview</a>
+    <a onclick="showTab('campaigns')">Campaigns</a>
+    <a onclick="showTab('platforms')">Platforms</a>
+    <a onclick="showTab('audience')">Audience</a>
+  </nav>
+  <div class="badge">Portfolio Project</div>
+</header>
+
+<!-- ══ MAIN ════════════════════════════════════════════ -->
+<main>
+
+  <!-- Page title -->
+  <div style="margin-bottom:28px;">
+    <h1 style="font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;letter-spacing:-.02em;margin-bottom:6px;">
+      Influencer Marketing ROI Intelligence
+    </h1>
+    <p style="color:var(--muted);font-size:.9rem;">
+      1,826 campaigns · 4 platforms · 7 categories · 2022–2026 · 150K raw records cleaned &amp; analyzed
+    </p>
+  </div>
+
+  <!-- Insight pills -->
+  <div class="insights">
+    <span class="pill purple">📸 Instagram leads revenue at $1.79M</span>
+    <span class="pill cyan">🐦 Twitter highest engagement rate 44%</span>
+    <span class="pill green">🍔 Food category top revenue driver</span>
+    <span class="pill amber">📢 Brand Awareness best campaign type</span>
+    <span class="pill red">⚡ Wednesday peak sales day</span>
+    <span class="pill purple">📅 Avg campaign duration 15.3 days</span>
+  </div>
+
+  <!-- ══ TAB BAR ══ -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('overview')">🏠 Overview</button>
+    <button class="tab-btn" onclick="showTab('campaigns')">📈 Campaigns</button>
+    <button class="tab-btn" onclick="showTab('platforms')">🔀 Platforms</button>
+    <button class="tab-btn" onclick="showTab('audience')">👥 Audience</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       TAB: OVERVIEW
+  ══════════════════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-overview">
+
+    <!-- KPI Cards -->
+    <div class="hero">
+      <div class="kpi purple">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-label">Total Campaigns</div>
+        <div class="kpi-val">1,826</div>
+        <div class="kpi-sub">Across 4 platforms · 5 types</div>
+        <span class="kpi-tag neutral">2022–2026</span>
+      </div>
+      <div class="kpi green">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-label">Total Revenue</div>
+        <div class="kpi-val">$4.52M</div>
+        <div class="kpi-sub">$2,475 avg per campaign</div>
+        <span class="kpi-tag up">↑ Consistent YoY</span>
+      </div>
+      <div class="kpi cyan">
+        <div class="kpi-icon">📡</div>
+        <div class="kpi-label">Total Reach</div>
+        <div class="kpi-val">917.8M</div>
+        <div class="kpi-sub">502K avg per campaign</div>
+        <span class="kpi-tag up">↑ Cross-platform</span>
+      </div>
+      <div class="kpi amber">
+        <div class="kpi-icon">❤️</div>
+        <div class="kpi-label">Total Engagements</div>
+        <div class="kpi-val">88.4M</div>
+        <div class="kpi-sub">31.2% avg engagement rate</div>
+        <span class="kpi-tag up">↑ Strong interaction</span>
+      </div>
+    </div>
+
+    <!-- Revenue trend + Donut -->
+    <div class="grid-3-2" style="margin-bottom:20px;">
+      <div class="chart-card glow-purple">
+        <h3>Monthly Revenue Trend</h3>
+        <div class="chart-wrap"><canvas id="revTrend" height="200"></canvas></div>
+      </div>
+      <div class="chart-card glow-cyan">
+        <h3>Revenue by Platform</h3>
+        <div class="chart-wrap"><canvas id="platDonut" height="200"></canvas></div>
+        <div class="legend" id="donutLegend"></div>
+      </div>
+    </div>
+
+    <!-- Category bar + Campaign type horizontal -->
+    <div class="grid-2">
+      <div class="chart-card">
+        <h3>Revenue by Influencer Category</h3>
+        <div class="chart-wrap"><canvas id="catBar" height="220"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Campaign Type Performance</h3>
+        <div class="chart-wrap"><canvas id="ctypeBar" height="220"></canvas></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       TAB: CAMPAIGNS
+  ══════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-campaigns">
+
+    <div class="hero" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi purple">
+        <div class="kpi-icon">🏅</div>
+        <div class="kpi-label">Best Campaign Type</div>
+        <div class="kpi-val" style="font-size:1.2rem;">Brand Awareness</div>
+        <div class="kpi-sub">$957,754 total revenue</div>
+      </div>
+      <div class="kpi cyan">
+        <div class="kpi-icon">📅</div>
+        <div class="kpi-label">Avg Campaign Duration</div>
+        <div class="kpi-val">15.3 <span style="font-size:1rem;">days</span></div>
+        <div class="kpi-sub">Range: 1–29 days</div>
+      </div>
+      <div class="kpi amber">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-label">Avg Daily Velocity</div>
+        <div class="kpi-val">333</div>
+        <div class="kpi-sub">Sales per campaign day</div>
+      </div>
+      <div class="kpi green">
+        <div class="kpi-icon">🔖</div>
+        <div class="kpi-label">Unique Campaigns</div>
+        <div class="kpi-val">1,826</div>
+        <div class="kpi-sub">Zero duplicates detected</div>
+      </div>
+    </div>
+
+    <!-- Yearly revenue bar + Campaign type donut -->
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="chart-card glow-purple">
+        <h3>Yearly Revenue Trend</h3>
+        <div class="chart-wrap"><canvas id="yearBar" height="220"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Campaign Type Revenue Split</h3>
+        <div class="chart-wrap"><canvas id="ctypeDonut" height="220"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Platform × Category heatmap table -->
+    <div class="section">
+      <div class="section-head">
+        <div class="dot" style="background:var(--p1)"></div>
+        <h2>Platform × Category Avg Sales Heatmap</h2>
+        <span>Darker = higher sales</span>
+      </div>
+      <div class="tbl-wrap">
+        <table id="heatmapTable"></table>
+      </div>
+    </div>
+
+    <!-- Campaign type summary table -->
+    <div class="section">
+      <div class="section-head">
+        <div class="dot" style="background:var(--cyan)"></div>
+        <h2>Campaign Type Summary</h2>
+      </div>
+      <div class="tbl-wrap">
+        <table id="ctypeTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       TAB: PLATFORMS
+  ══════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-platforms">
+
+    <!-- Platform cards -->
+    <div class="platform-grid">
+      <div class="platform-card" style="border-top:3px solid var(--p1)">
+        <div class="platform-name" style="color:var(--p1)">📸 Instagram</div>
+        <div class="platform-rev" style="color:var(--text)">$1,785,831</div>
+        <div class="platform-meta">723 campaigns · 27.8% eng. rate</div>
+      </div>
+      <div class="platform-card" style="border-top:3px solid var(--red)">
+        <div class="platform-name" style="color:var(--red)">▶️ YouTube</div>
+        <div class="platform-rev" style="color:var(--text)">$1,332,320</div>
+        <div class="platform-meta">540 campaigns · 26.7% eng. rate</div>
+      </div>
+      <div class="platform-card" style="border-top:3px solid var(--cyan)">
+        <div class="platform-name" style="color:var(--cyan)">🎵 TikTok</div>
+        <div class="platform-rev" style="color:var(--text)">$909,226</div>
+        <div class="platform-meta">378 campaigns · 38.1% eng. rate</div>
+      </div>
+      <div class="platform-card" style="border-top:3px solid var(--amber)">
+        <div class="platform-name" style="color:var(--amber)">🐦 Twitter</div>
+        <div class="platform-rev" style="color:var(--text)">$491,740</div>
+        <div class="platform-meta">185 campaigns · 44.1% eng. rate</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="chart-card glow-purple">
+        <h3>Platform Revenue Comparison</h3>
+        <div class="chart-wrap"><canvas id="platBar" height="230"></canvas></div>
+      </div>
+      <div class="chart-card glow-cyan">
+        <h3>Engagement Rate by Platform</h3>
+        <div class="chart-wrap"><canvas id="engBar" height="230"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:20px;">
+      <h3>Platform Campaigns vs Revenue (Bubble = Campaign Count)</h3>
+      <div class="chart-wrap"><canvas id="platBubble" height="160"></canvas></div>
+    </div>
+
+    <!-- Platform full table -->
+    <div class="section">
+      <div class="section-head">
+        <div class="dot" style="background:var(--green)"></div>
+        <h2>Platform Head-to-Head Metrics</h2>
+      </div>
+      <div class="tbl-wrap">
+        <table id="platTable"></table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       TAB: AUDIENCE
+  ══════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-audience">
+
+    <div class="hero" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi purple">
+        <div class="kpi-icon">📅</div>
+        <div class="kpi-label">Best Launch Day</div>
+        <div class="kpi-val" style="font-size:1.2rem;">Wednesday</div>
+        <div class="kpi-sub">Highest avg sales $2,582</div>
+      </div>
+      <div class="kpi cyan">
+        <div class="kpi-icon">📡</div>
+        <div class="kpi-label">Highest Reach Category</div>
+        <div class="kpi-val" style="font-size:1.2rem;">Food</div>
+        <div class="kpi-sub">Top revenue $690K</div>
+      </div>
+      <div class="kpi amber">
+        <div class="kpi-icon">❤️</div>
+        <div class="kpi-label">Top Engaged Category</div>
+        <div class="kpi-val" style="font-size:1.2rem;">Fitness</div>
+        <div class="kpi-sub">40.6% avg eng. rate</div>
+      </div>
+      <div class="kpi green">
+        <div class="kpi-icon">🔀</div>
+        <div class="kpi-label">Avg Engagement Rate</div>
+        <div class="kpi-val">31.2%</div>
+        <div class="kpi-sub">Across all campaigns</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="chart-card glow-purple">
+        <h3>Category Engagement Rate</h3>
+        <div class="chart-wrap"><canvas id="catEngBar" height="230"></canvas></div>
+      </div>
+      <div class="chart-card glow-cyan">
+        <h3>Sales by Day of Week (Launch Day)</h3>
+        <div class="chart-wrap"><canvas id="dowBar" height="230"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:20px;">
+      <h3>Category Revenue Breakdown (All Campaigns)</h3>
+      <div class="chart-wrap"><canvas id="catRevLine" height="160"></canvas></div>
+    </div>
+
+    <!-- Category table -->
+    <div class="section">
+      <div class="section-head">
+        <div class="dot" style="background:var(--amber)"></div>
+        <h2>Category Performance Table</h2>
+      </div>
+      <div class="tbl-wrap">
+        <table id="catTable"></table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ FOOTER ══════════════════════════════════════════ -->
+<footer>
+  <span>📊 Influencer Marketing ROI Dashboard · Built By Creator DecoderSpace · 150K rows analyzed</span>
+  <span>Data Engineering · EDA · KPI Design · Dashboard Architecture</span>
+</footer>
+
+<!-- ══════════════════════════════════════════════════════
+     DATA & SCRIPTS
+══════════════════════════════════════════════════════ -->
+<script>
+// ── Embedded Dataset ──────────────────────────────────────────────────────
+
+const MONTHLY = [{"month_year":"2022-01","revenue":59848,"campaigns":31},{"month_year":"2022-02","revenue":73881,"campaigns":28},{"month_year":"2022-03","revenue":83089,"campaigns":31},{"month_year":"2022-04","revenue":66404,"campaigns":30},{"month_year":"2022-05","revenue":86936,"campaigns":31},{"month_year":"2022-06","revenue":79567,"campaigns":30},{"month_year":"2022-07","revenue":73552,"campaigns":31},{"month_year":"2022-08","revenue":78943,"campaigns":31},{"month_year":"2022-09","revenue":78184,"campaigns":30},{"month_year":"2022-10","revenue":79884,"campaigns":31},{"month_year":"2022-11","revenue":76468,"campaigns":30},{"month_year":"2022-12","revenue":74347,"campaigns":31},{"month_year":"2023-01","revenue":60501,"campaigns":31},{"month_year":"2023-02","revenue":67692,"campaigns":28},{"month_year":"2023-03","revenue":67820,"campaigns":31},{"month_year":"2023-04","revenue":56808,"campaigns":30},{"month_year":"2023-05","revenue":64192,"campaigns":31},{"month_year":"2023-06","revenue":67865,"campaigns":30},{"month_year":"2023-07","revenue":77957,"campaigns":31},{"month_year":"2023-08","revenue":73962,"campaigns":31},{"month_year":"2023-09","revenue":75719,"campaigns":30},{"month_year":"2023-10","revenue":86411,"campaigns":31},{"month_year":"2023-11","revenue":73476,"campaigns":30},{"month_year":"2023-12","revenue":77961,"campaigns":31},{"month_year":"2024-01","revenue":85272,"campaigns":31},{"month_year":"2024-02","revenue":68619,"campaigns":29},{"month_year":"2024-03","revenue":78258,"campaigns":31},{"month_year":"2024-04","revenue":68425,"campaigns":30},{"month_year":"2024-05","revenue":73910,"campaigns":31},{"month_year":"2024-06","revenue":67224,"campaigns":30},{"month_year":"2024-07","revenue":83506,"campaigns":31},{"month_year":"2024-08","revenue":88269,"campaigns":31},{"month_year":"2024-09","revenue":79619,"campaigns":30},{"month_year":"2024-10","revenue":59819,"campaigns":31},{"month_year":"2024-11","revenue":77152,"campaigns":30},{"month_year":"2024-12","revenue":85857,"campaigns":31},{"month_year":"2025-01","revenue":75996,"campaigns":31},{"month_year":"2025-02","revenue":72143,"campaigns":28},{"month_year":"2025-03","revenue":73500,"campaigns":31},{"month_year":"2025-04","revenue":86328,"campaigns":30},{"month_year":"2025-05","revenue":77304,"campaigns":31},{"month_year":"2025-06","revenue":67465,"campaigns":30},{"month_year":"2025-07","revenue":84717,"campaigns":31},{"month_year":"2025-08","revenue":74581,"campaigns":31},{"month_year":"2025-09","revenue":84509,"campaigns":30},{"month_year":"2025-10","revenue":82368,"campaigns":31},{"month_year":"2025-11","revenue":66389,"campaigns":30},{"month_year":"2025-12","revenue":83214,"campaigns":31},{"month_year":"2026-01","revenue":76260,"campaigns":31},{"month_year":"2026-02","revenue":65678,"campaigns":28},{"month_year":"2026-03","revenue":70074,"campaigns":31},{"month_year":"2026-04","revenue":78834,"campaigns":30},{"month_year":"2026-05","revenue":71440,"campaigns":31},{"month_year":"2026-06","revenue":78488,"campaigns":30},{"month_year":"2026-07","revenue":88654,"campaigns":31},{"month_year":"2026-08","revenue":74568,"campaigns":31},{"month_year":"2026-09","revenue":73791,"campaigns":30},{"month_year":"2026-10","revenue":84171,"campaigns":31},{"month_year":"2026-11","revenue":67735,"campaigns":30},{"month_year":"2026-12","revenue":83513,"campaigns":31}];
+
+const PLATFORM = [{"platform":"Instagram","revenue":1785831,"campaigns":723,"eng_rate":0.2775},{"platform":"YouTube","revenue":1332320,"campaigns":540,"eng_rate":0.2668},{"platform":"TikTok","revenue":909226,"campaigns":378,"eng_rate":0.3806},{"platform":"Twitter","revenue":491740,"campaigns":185,"eng_rate":0.4408}];
+
+const CATEGORY = [{"influencer_category":"Food","revenue":690280,"campaigns":271,"eng_rate":0.2964},{"influencer_category":"Fitness","revenue":665616,"campaigns":272,"eng_rate":0.4059},{"influencer_category":"Travel","revenue":655206,"campaigns":261,"eng_rate":0.3588},{"influencer_category":"Beauty","revenue":654874,"campaigns":283,"eng_rate":0.3208},{"influencer_category":"Tech","revenue":651335,"campaigns":257,"eng_rate":0.2516},{"influencer_category":"Gaming","revenue":606139,"campaigns":239,"eng_rate":0.2404},{"influencer_category":"Fashion","revenue":595667,"campaigns":243,"eng_rate":0.2999}];
+
+const CTYPE = [{"campaign_type":"Brand Awareness","revenue":957754,"avg_sales":2602.6,"campaigns":368},{"campaign_type":"Giveaway","revenue":954326,"avg_sales":2459.6,"campaigns":388},{"campaign_type":"Product Launch","revenue":907294,"avg_sales":2419.5,"campaigns":375},{"campaign_type":"Seasonal Sale","revenue":856114,"avg_sales":2425.3,"campaigns":353},{"campaign_type":"Event Promotion","revenue":843629,"avg_sales":2466.8,"campaigns":342}];
+
+const HEATMAP = [{"platform":"Instagram","influencer_category":"Beauty","product_sales":2058},{"platform":"Instagram","influencer_category":"Fashion","product_sales":2442},{"platform":"Instagram","influencer_category":"Fitness","product_sales":2538},{"platform":"Instagram","influencer_category":"Food","product_sales":2627},{"platform":"Instagram","influencer_category":"Gaming","product_sales":2614},{"platform":"Instagram","influencer_category":"Tech","product_sales":2361},{"platform":"Instagram","influencer_category":"Travel","product_sales":2652},{"platform":"TikTok","influencer_category":"Beauty","product_sales":2657},{"platform":"TikTok","influencer_category":"Fashion","product_sales":2230},{"platform":"TikTok","influencer_category":"Fitness","product_sales":2044},{"platform":"TikTok","influencer_category":"Food","product_sales":2377},{"platform":"TikTok","influencer_category":"Gaming","product_sales":2574},{"platform":"TikTok","influencer_category":"Tech","product_sales":2516},{"platform":"TikTok","influencer_category":"Travel","product_sales":2336},{"platform":"Twitter","influencer_category":"Beauty","product_sales":2429},{"platform":"Twitter","influencer_category":"Fashion","product_sales":2247},{"platform":"Twitter","influencer_category":"Fitness","product_sales":2822},{"platform":"Twitter","influencer_category":"Food","product_sales":2812},{"platform":"Twitter","influencer_category":"Gaming","product_sales":2650},{"platform":"Twitter","influencer_category":"Tech","product_sales":2805},{"platform":"Twitter","influencer_category":"Travel","product_sales":2653},{"platform":"YouTube","influencer_category":"Beauty","product_sales":2327},{"platform":"YouTube","influencer_category":"Fashion","product_sales":2693},{"platform":"YouTube","influencer_category":"Fitness","product_sales":2435},{"platform":"YouTube","influencer_category":"Food","product_sales":2454},{"platform":"YouTube","influencer_category":"Gaming","product_sales":2370},{"platform":"YouTube","influencer_category":"Tech","product_sales":2702},{"platform":"YouTube","influencer_category":"Travel","product_sales":2368}];
+
+const DOW = [{"day_of_week":"Monday","product_sales":2396},{"day_of_week":"Tuesday","product_sales":2475},{"day_of_week":"Wednesday","product_sales":2582},{"day_of_week":"Thursday","product_sales":2552},{"day_of_week":"Friday","product_sales":2470},{"day_of_week":"Saturday","product_sales":2495},{"day_of_week":"Sunday","product_sales":2355}];
+
+// ── Chart defaults ────────────────────────────────────────────────────────
+
+const FONT = "'DM Sans', sans-serif";
+const GRID_COLOR = '#1E1E32';
+const LABEL_COLOR = '#6B7280';
+const PLAT_COLORS = {
+  Instagram:'#6C63FF', YouTube:'#F87171', TikTok:'#22D3EE', Twitter:'#FBBF24'
+};
+const CAT_COLORS = ['#6C63FF','#22D3EE','#FBBF24','#F472B6','#34D399','#F87171','#A78BFA'];
+const TYPE_COLORS = ['#6C63FF','#22D3EE','#34D399','#FBBF24','#F87171'];
+
+Chart.defaults.color = LABEL_COLOR;
+Chart.defaults.font.family = FONT;
+Chart.defaults.font.size = 12;
+
+function baseAxes(x='linear', y='linear'){
+  return {
+    x:{ grid:{color:GRID_COLOR}, ticks:{color:LABEL_COLOR} },
+    y:{ grid:{color:GRID_COLOR}, ticks:{color:LABEL_COLOR} }
+  };
+}
+
+// ── Build Charts ──────────────────────────────────────────────────────────
+
+// 1. Monthly revenue trend
+new Chart(document.getElementById('revTrend'), {
+  type:'line',
+  data:{
+    labels: MONTHLY.map(d=>d.month_year),
+    datasets:[{
+      label:'Revenue',
+      data: MONTHLY.map(d=>d.revenue),
+      borderColor:'#6C63FF',
+      borderWidth:2.5,
+      backgroundColor:'rgba(108,99,255,0.10)',
+      fill:true,
+      tension:.4,
+      pointRadius:0,
+      pointHoverRadius:5,
+      pointHoverBackgroundColor:'#6C63FF',
+    },{
+      label:'Campaigns',
+      data: MONTHLY.map(d=>d.campaigns),
+      borderColor:'#22D3EE',
+      borderWidth:1.5,
+      borderDash:[4,4],
+      backgroundColor:'transparent',
+      fill:false,
+      tension:.4,
+      pointRadius:0,
+      yAxisID:'y2',
+    }]
+  },
+  options:{
+    responsive:true,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{labels:{color:LABEL_COLOR,usePointStyle:true,boxWidth:8,padding:16}},
+      tooltip:{backgroundColor:'#141422',borderColor:'#1E1E32',borderWidth:1,
+        callbacks:{label:ctx=>ctx.datasetIndex===0?` $${ctx.parsed.y.toLocaleString()}`:` ${ctx.parsed.y} campaigns`}}
+    },
+    scales:{
+      x:{grid:{color:GRID_COLOR},ticks:{color:LABEL_COLOR,maxTicksLimit:12,maxRotation:45}},
+      y:{grid:{color:GRID_COLOR},ticks:{color:LABEL_COLOR,callback:v=>'$'+v.toLocaleString()}},
+      y2:{position:'right',grid:{display:false},ticks:{color:'#22D3EE'}}
+    }
+  }
+});
+
+// 2. Platform donut
+const platRevs = PLATFORM.map(d=>d.revenue);
+const platNames = PLATFORM.map(d=>d.platform);
+const platCols = PLATFORM.map(d=>PLAT_COLORS[d.platform]);
+new Chart(document.getElementById('platDonut'),{
+  type:'doughnut',
+  data:{
+    labels:platNames,
+    datasets:[{data:platRevs,backgroundColor:platCols,borderColor:'#07070E',borderWidth:3,hoverOffset:6}]
+  },
+  options:{
+    responsive:true,cutout:'62%',
+    plugins:{
+      legend:{display:false},
+      tooltip:{backgroundColor:'#141422',borderColor:'#1E1E32',borderWidth:1,
+        callbacks:{label:ctx=>`$${ctx.parsed.toLocaleString()} (${(ctx.parsed/4519117*100).toFixed(1)}%)`}}
+    }
+  }
+});
+const dLeg = document.getElementById('donutLegend');
+PLATFORM.forEach(d=>{
+  const pct = (d.revenue/4519117*100).toFixed(1);
+  dLeg.innerHTML += `<div class="legend-item">
+    <div class="legend-dot" style="background:${PLAT_COLORS[d.platform]}"></div>
+    <span class="legend-label">${d.platform}</span>
+    <span class="legend-val">$${(d.revenue/1000).toFixed(0)}K &nbsp;<span style="color:var(--muted)">${pct}%</span></span>
+  </div>`;
+});
+
+// 3. Category bar
+new Chart(document.getElementById('catBar'),{
+  type:'bar',
+  data:{
+    labels:CATEGORY.map(d=>d.influencer_category),
+    datasets:[{
+      label:'Revenue',
+      data:CATEGORY.map(d=>d.revenue),
+      backgroundColor:CAT_COLORS,
+      borderRadius:8,borderSkipped:false,
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#141422',borderColor:'#1E1E32',borderWidth:1,
+        callbacks:{label:ctx=>`$${ctx.parsed.y.toLocaleString()}`}}},
+    scales:{
+      x:{grid:{display:false},ticks:{color:LABEL_COLOR}},
+      y:{grid:{color:GRID_COLOR},ticks:{color:LABEL_COLOR,callback:v=>'$'+v.toLocaleString()}}
+    }
+  }
+});
+
+// 4. Campaign type horizontal bar
+new Chart(document.getElementById('ctypeBar'),{
+  type:'bar',
+  data:{
+    labels:CTYPE.map(d=>d.campaign_type),
+    datasets:[{
+      label:'Total Revenue',
+      data:CTYPE.map(d=>d.revenue),
+      backgroundColor:TYPE_COLORS,
+      borderRadius:8,borderSkipped:false,
+    }]
+  },
+  options:{
+    indexAxis:'y',responsive:true,
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#141422',borderColor:'#1E1E32',borderWidth:1,
+        callbacks:{label:ctx=>`$${ctx.parsed.x.toLocaleString()}`}}},
+    scales:{
+      x:{grid:{color:GRID_COLOR},ticks:{color:LABEL_COLOR,callback:v=>'$'+v.toLocaleString()}},
+      y:{grid:{display:false},ticks:{color:LABEL_COLOR}}
+    }
+  }
+});
+
+// 5. Yearly bar (campaigns tab)
+const yearly = {};
+MONTHLY.forEach(d=>{
+  const y = d.month_year.split('-')[0];
+  yearly[y] = (yearly[y]||0)+d.revenue;
+});
+new Chart(document.getElementById('yearBar'),{
+  type:'bar',
+  data:{
+    labels:Object.keys(yearly),
+    datasets:[{
+      label:'Revenue',
+      data:Object.values(yearly),
+      backgroundColor:['#6C63FF','#22D3EE','#FBBF24','#34D399','#F472B6'],
+      borderRadius:10,borderSkipped:false,
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#141422',borderColor:'#1E1E32',borderWidth:1,
+        callbacks:{label:ctx=>`$${ctx.parsed.y.toLocaleString()}`}}},
+    scales:{
+      x:{grid:{display:false},ticks:{color:LABEL_COLOR}},
+      y:{grid:{color:GRID_COLOR},ticks:{color:LABEL_COLOR,callback:v=>'$'+v.toLocaleString()}}
+    }
+  }
+});
+
+// 6. Campaign type donut
+new Chart(document.getElementById('ctypeDonut'),{
+  type:'doughnut',
+  data:{
+    labels:CTYPE.map(d=>d.campaign_type),
+    datasets:[{data:CTYPE.map(d=>d.revenue),backgroundColor:TYPE_COLORS,borderColor:'#07070E',borderWidth:3,hoverOffset:6}]
+  },
+  options:{
+    responsive:true,cutout:'58%',
+    plugins:{
+      legend:{labels:{color:LABEL_COLOR,usePointStyle:true,boxWidth:8,padding:14}},
+      tooltip:{backgroundColor:'#141422',borderColor:'#1E1E32',borderWidth:1,
+        callbacks:{label:ctx=>`$${ctx.parsed.toLocaleString()}`}}
+    }
+  }
+});
+
+// 7. Platform bar (platforms tab)
+new Chart(document.getElementById('platBar'),{
+  type:'bar',
+  data:{
+    labels:PLATFORM.map(d=>d.platform),
+    datasets:[{
+      label:'Total Revenue',
+      data:PLATFORM.map(d=>d.revenue),
+      backgroundColor:PLATFORM.map(d=>PLAT_COLORS[d.platform]),
+      borderRadius:10,borderSkipped:false,
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#141422',borderColor:'#1E1E32',borderWidth:1,
+        callbacks:{label:ctx=>`$${ctx.parsed.y.toLocaleString()}`}}},
+    scales:{
+      x:{grid:{display:false},ticks:{color:LABEL_COLOR}},
+      y:{grid:{color:GRID_COLOR},ticks:{color:LABEL_COLOR,callback:v=>'$'+v.toLocaleString()}}
+    }
+  }
+});
+
+// 8. Engagement rate bar
+new Chart(document.getElementById('engBar'),{
+  type:'bar',
+  data:{
+    labels:PLATFORM.map(d=>d.platform),
+    datasets:[{
+      label:'Avg Engagement Rate',
+      data:PLATFORM.map(d=>+(d.eng_rate*100).toFixed(2)),
+      backgroundColor:PLATFORM.map(d=>PLAT_COLORS[d.platform]+'BB'),
+      borderColor:PLATFORM.map(d=>PLAT_COLORS[d.platform]),
+      borderWidth:2,borderRadius:10,borderSkipped:false,
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#141422',borderColor:'#1E1E32',borderWidth:1,
+        callbacks:{label:ctx=>`${ctx.parsed.y.toFixed(2)}%`}}},
+    scales:{
+      x:{grid:{display:false},ticks:{color:LABEL_COLOR}},
+      y:{grid:{color:GRID_COLOR},ticks:{color:LABEL_COLOR,callback:v=>v+'%'}}
+    }
+  }
+});
+
+// 9. Platform bubble
+new Chart(document.getElementById('platBubble'),{
+  type:'bubble',
+  data:{
+    datasets: PLATFORM.map(d=>({
+      label:d.platform,
+      data:[{x:d.campaigns, y:d.revenue, r:Math.sqrt(d.campaigns)*1.8}],
+      backgroundColor:PLAT_COLORS[d.platform]+'55',
+      borderColor:PLAT_COLORS[d.platform],
+      borderWidth:2,
+    }))
+  },
+  options:{
+    responsive:true,
+    plugins:{
+      legend:{labels:{color:LABEL_COLOR,usePointStyle:true,boxWidth:8}},
+      tooltip:{backgroundColor:'#141422',borderColor:'#1E1E32',borderWidth:1,
+        callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.x} campaigns · $${ctx.parsed.y.toLocaleString()}`}}
+    },
+    scales:{
+      x:{grid:{color:GRID_COLOR},ticks:{color:LABEL_COLOR},title:{display:true,text:'Campaigns',color:LABEL_COLOR}},
+      y:{grid:{color:GRID_COLOR},ticks:{color:LABEL_COLOR,callback:v=>'$'+v.toLocaleString()},title:{display:true,text:'Revenue',color:LABEL_COLOR}}
+    }
+  }
+});
+
+// 10. Category engagement rate bar (audience tab)
+new Chart(document.getElementById('catEngBar'),{
+  type:'bar',
+  data:{
+    labels:CATEGORY.map(d=>d.influencer_category),
+    datasets:[{
+      label:'Avg Engagement Rate',
+      data:CATEGORY.map(d=>+(d.eng_rate*100).toFixed(2)),
+      backgroundColor:CAT_COLORS.map(c=>c+'AA'),
+      borderColor:CAT_COLORS,
+      borderWidth:2,borderRadius:8,borderSkipped:false,
+    }]
+  },
+  options:{
+    indexAxis:'y',responsive:true,
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#141422',borderColor:'#1E1E32',borderWidth:1,
+        callbacks:{label:ctx=>`${ctx.parsed.x.toFixed(2)}%`}}},
+    scales:{
+      x:{grid:{color:GRID_COLOR},ticks:{color:LABEL_COLOR,callback:v=>v+'%'}},
+      y:{grid:{display:false},ticks:{color:LABEL_COLOR}}
+    }
+  }
+});
+
+// 11. Day of week
+new Chart(document.getElementById('dowBar'),{
+  type:'bar',
+  data:{
+    labels:DOW.map(d=>d.day_of_week.substring(0,3)),
+    datasets:[{
+      label:'Avg Sales',
+      data:DOW.map(d=>d.product_sales),
+      backgroundColor:DOW.map((d,i)=>i===2?'#6C63FF':'#6C63FF44'),
+      borderColor:DOW.map((d,i)=>i===2?'#6C63FF':'#6C63FF66'),
+      borderWidth:2,borderRadius:8,borderSkipped:false,
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#141422',borderColor:'#1E1E32',borderWidth:1,
+        callbacks:{label:ctx=>`Avg Sales: $${ctx.parsed.y.toLocaleString()}`}}},
+    scales:{
+      x:{grid:{display:false},ticks:{color:LABEL_COLOR}},
+      y:{grid:{color:GRID_COLOR},ticks:{color:LABEL_COLOR,callback:v=>'$'+v.toLocaleString()},min:2200}
+    }
+  }
+});
+
+// 12. Category revenue radar-style line
+new Chart(document.getElementById('catRevLine'),{
+  type:'radar',
+  data:{
+    labels:CATEGORY.map(d=>d.influencer_category),
+    datasets:[{
+      label:'Total Revenue',
+      data:CATEGORY.map(d=>d.revenue),
+      backgroundColor:'rgba(108,99,255,0.15)',
+      borderColor:'#6C63FF',
+      borderWidth:2.5,
+      pointBackgroundColor:'#6C63FF',
+      pointRadius:5,
+    },{
+      label:'Campaigns',
+      data:CATEGORY.map(d=>d.campaigns*2500),
+      backgroundColor:'rgba(34,211,238,0.08)',
+      borderColor:'#22D3EE',
+      borderWidth:2,
+      pointBackgroundColor:'#22D3EE',
+      pointRadius:4,
+      borderDash:[4,4],
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{
+      legend:{labels:{color:LABEL_COLOR,usePointStyle:true,boxWidth:8,padding:14}},
+      tooltip:{backgroundColor:'#141422',borderColor:'#1E1E32',borderWidth:1,
+        callbacks:{label:ctx=>ctx.datasetIndex===0?`Revenue: $${ctx.raw.toLocaleString()}`:`Campaigns: ${Math.round(ctx.raw/2500)}`}}
+    },
+    scales:{
+      r:{grid:{color:GRID_COLOR},ticks:{display:false},pointLabels:{color:LABEL_COLOR,font:{size:12}}}
+    }
+  }
+});
+
+
+// ── Tables ────────────────────────────────────────────────────────────────
+
+// Heatmap table
+function buildHeatmap(){
+  const platforms = ['Instagram','YouTube','TikTok','Twitter'];
+  const categories = [...new Set(HEATMAP.map(d=>d.influencer_category))];
+  const lookup = {};
+  HEATMAP.forEach(d=>{ lookup[d.platform+'|'+d.influencer_category] = d.product_sales; });
+  const allVals = HEATMAP.map(d=>d.product_sales);
+  const min = Math.min(...allVals), max = Math.max(...allVals);
+
+  let html = '<thead><tr><th>Category</th>';
+  platforms.forEach(p=>html+=`<th>${p}</th>`);
+  html += '</tr></thead><tbody>';
+  categories.forEach(cat=>{
+    html += `<tr><td style="font-weight:500;color:var(--text)">${cat}</td>`;
+    platforms.forEach(p=>{
+      const v = lookup[p+'|'+cat]||0;
+      const alpha = ((v-min)/(max-min)*0.7+0.1).toFixed(2);
+      html += `<td style="background:rgba(108,99,255,${alpha});color:var(--text);font-weight:500">$${v.toLocaleString()}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('heatmapTable').innerHTML = html;
+}
+
+// Campaign type table
+function buildCtypeTable(){
+  let html = `<thead><tr>
+    <th>#</th><th>Campaign Type</th><th>Campaigns</th>
+    <th>Total Revenue</th><th>Avg Sales</th>
+  </tr></thead><tbody>`;
+  CTYPE.forEach((d,i)=>{
+    const pct = (d.revenue/4519117*100).toFixed(1);
+    const w = (d.revenue/957754*160).toFixed(0);
+    html += `<tr>
+      <td><span class="rank">${i+1}</span></td>
+      <td style="color:var(--text);font-weight:500">${d.campaign_type}</td>
+      <td>${d.campaigns}</td>
+      <td>
+        <div style="position:relative;min-width:200px">
+          <div style="background:var(--border);height:4px;border-radius:4px;width:160px;margin-bottom:4px">
+            <div style="background:${TYPE_COLORS[i]};height:4px;border-radius:4px;width:${w}px"></div>
+          </div>
+          <span style="color:var(--text)">$${d.revenue.toLocaleString()}</span>
+          <span style="color:var(--muted);font-size:.72rem;margin-left:6px">${pct}%</span>
+        </div>
+      </td>
+      <td style="color:var(--text)">$${d.avg_sales.toFixed(0)}</td>
+    </tr>`;
+  });
+  html += '</tbody>';
+  document.getElementById('ctypeTable').innerHTML = html;
+}
+
+// Platform table
+function buildPlatTable(){
+  let html = `<thead><tr>
+    <th>Platform</th><th>Campaigns</th><th>Total Revenue</th>
+    <th>Avg Eng. Rate</th><th>Revenue Share</th>
+  </tr></thead><tbody>`;
+  PLATFORM.forEach(d=>{
+    const pct = (d.revenue/4519117*100).toFixed(1);
+    const w = (d.revenue/1785831*160).toFixed(0);
+    html += `<tr>
+      <td style="color:${PLAT_COLORS[d.platform]};font-weight:700">${d.platform}</td>
+      <td>${d.campaigns}</td>
+      <td style="color:var(--text)">$${d.revenue.toLocaleString()}</td>
+      <td>${(d.eng_rate*100).toFixed(1)}%</td>
+      <td>
+        <div style="background:var(--border);height:4px;border-radius:4px;width:160px;margin-bottom:3px">
+          <div style="background:${PLAT_COLORS[d.platform]};height:4px;border-radius:4px;width:${w}px"></div>
+        </div>
+        <span style="font-size:.75rem;color:var(--muted)">${pct}%</span>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody>';
+  document.getElementById('platTable').innerHTML = html;
+}
+
+// Category table
+function buildCatTable(){
+  let html = `<thead><tr>
+    <th>#</th><th>Category</th><th>Campaigns</th>
+    <th>Total Revenue</th><th>Avg Eng. Rate</th>
+  </tr></thead><tbody>`;
+  CATEGORY.forEach((d,i)=>{
+    html += `<tr>
+      <td><span class="rank">${i+1}</span></td>
+      <td style="color:${CAT_COLORS[i]};font-weight:600">${d.influencer_category}</td>
+      <td>${d.campaigns}</td>
+      <td style="color:var(--text);font-weight:500">$${d.revenue.toLocaleString()}</td>
+      <td>${(d.eng_rate*100).toFixed(1)}%</td>
+    </tr>`;
+  });
+  html += '</tbody>';
+  document.getElementById('catTable').innerHTML = html;
+}
+
+buildHeatmap();
+buildCtypeTable();
+buildPlatTable();
+buildCatTable();
+
+
+// ── Tab system ────────────────────────────────────────────────────────────
+
+function showTab(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    if(b.textContent.toLowerCase().includes(name.substring(0,4))) b.classList.add('active');
+  });
+  document.querySelectorAll('nav a').forEach(a=>{
+    a.classList.toggle('active', a.textContent.toLowerCase().includes(name.substring(0,4)));
+  });
+}
+
+// sync nav
+document.querySelectorAll('nav a').forEach(a=>{
+  a.addEventListener('click',()=>{
+    const t = a.textContent.trim().toLowerCase();
+    if(t.includes('over')) showTab('overview');
+    else if(t.includes('camp')) showTab('campaigns');
+    else if(t.includes('plat')) showTab('platforms');
+    else if(t.includes('aud')) showTab('audience');
+  });
+});
+</script>
+</body>
+</html>
