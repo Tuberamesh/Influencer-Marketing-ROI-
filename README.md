@@ -1,8 +1,8 @@
-# Influencer Marketing ROI Dashboard
+e# Influencer Marketing ROI Dashboard
 
 An interactive marketing analytics dashboard built to analyze influencer campaign performance, engagement behavior, and ROI trends across multiple social platforms.
 
-This project focuses on KPI-driven storytelling, business intelligence, and modern dashboard design using frontend analytics visualization techniques.
+🔗 Live Demo: https://your-demo-link.vercel.app
 
 ---
 
