@@ -97,7 +97,7 @@ This dashboard helps marketing teams:
 
 ## Preview
 
-![Dashboard Preview](.Overview.png)
+![Dashboard Preview](https://github.com/Tuberamesh/Influencer-Marketing-ROI-/blob/main/Previews/Overview.png)
 
 ---
 
