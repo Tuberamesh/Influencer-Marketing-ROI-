@@ -119,18 +119,10 @@ Focused on Data Analytics, Dashboard Storytelling, and Business Intelligence.
 
 ---
 
-## Connect With Me
-
-- [LinkedIn:] (https://www.linkedin.com/in/ramesha-g/)
-- YouTube: (https://www.youtube.com/@The_Decoder_yt/)
-- [Instagram:] (https://www.instagram.com/decoder_space/)
-- [Portfolio:] (https://main-portfolio-tuberameshs-projects.vercel.app)
-
-📧 Email: r69046183@gmail.com
+## Connect With Me * [LinkedIn](https://www.linkedin.com/in/ramesha-g/) * [YouTube](https://www.youtube.com/@The_Decoder_yt/) * [Instagram](https://www.instagram.com/decoder_space/) * [Portfolio](https://main-portfolio-tuberameshs-projects.vercel.app) 📧 Email: [r69046183@gmail.com](mailto:r69046183@gmail.com)
 
 ---
 
 ## Final Note
 
 This project reflects practical skills in analytics thinking, KPI engineering, dashboard storytelling, and frontend data visualization. It represents a business-oriented approach to transforming raw marketing data into actionable insights.
-```
