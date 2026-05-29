@@ -2,7 +2,7 @@
 
 An interactive marketing analytics dashboard built to analyze influencer campaign performance, engagement behavior, and ROI trends across multiple social platforms.
 
-🔗 Live Demo: (https://tuberamesh.github.io/Influencer-Marketing-ROI-/dashboard.html)
+🔗 [Live Demo:] (https://tuberamesh.github.io/Influencer-Marketing-ROI-/dashboard.html)
 
 ---
 
