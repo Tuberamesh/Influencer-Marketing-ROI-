@@ -1,4 +1,4 @@
-e# Influencer Marketing ROI Dashboard
+# Influencer Marketing ROI Dashboard
 
 An interactive marketing analytics dashboard built to analyze influencer campaign performance, engagement behavior, and ROI trends across multiple social platforms.
 
