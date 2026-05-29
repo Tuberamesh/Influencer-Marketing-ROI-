@@ -1,10 +1,4 @@
-Good choice — that balance fits a **data analyst / BI portfolio** perfectly. Your README should feel like a *case study*, not a social media post.
-
-Below is your **clean premium README (80% text, 20% minimal icons)** — copy ready:
-
----
-
-# Influencer Marketing ROI Dashboard
+## Influencer Marketing ROI Dashboard
 
 A data analytics dashboard designed to analyze influencer marketing performance across platforms, campaign types, and audience segments.
 This project focuses on business intelligence, KPI tracking, and data storytelling using interactive visualizations.
